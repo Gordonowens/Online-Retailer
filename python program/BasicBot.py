@@ -2,14 +2,21 @@ import mysql.connector
 
 class BasicBot:
     
-    def __init__(self, frequency, database):
+    def __init__(self, frequency, database, id, fName, lName):
         self.database = database
         self.frequency = frequency
+        fName = fName
+        lName = lName
+        id = id
         self.state = "inactive"
 
 
 
     def sendQuery(self):
+        """
+        test one
+        :return:
+        """
 
         self.database.execute("select customer.customer_id, customer.customer_name, orders.order_date, product.product_name from customer left join orders on customer.customer_id = orders.customer_id left join product on orders.product_id = product.product_id;")
 
@@ -25,7 +32,19 @@ class BasicBot:
         self.state = "inactive"
 
 
-    def updateState(self, time):
+
+    def runQuery(self, query):
+
+        self.database.execute(query)
+
+
+
+    def update(self, time):
+        """
+        test two
+        :param time:
+        :return:
+        """
         if time % self.frequency == 0:
             self.state = "active"
 
