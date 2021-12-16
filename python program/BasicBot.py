@@ -1,60 +1,45 @@
-import mysql.connector
+import random
 
 class BasicBot:
-    
-    def __init__(self, frequency, database, id, fName, lName):
+    """
+    a basic bot has no real functionality
+    """
+    def __init__(self, frequency, database, id, fName, lName, generalData):
         self.database = database
         self.frequency = frequency
-        fName = fName
-        lName = lName
-        id = id
+        self.fName = fName
+        self.lName = lName
+        self.id = id
         self.state = "inactive"
+        self.generalData = generalData
 
-
-
-    def sendQuery(self):
+    def decision(self, probability):
         """
-        test one
-        :return:
+        :param probability: float of probability of returning true
+        :return: bool
+        """
+        return random.random() < probability
+
+    def getDataFromDatabase(self, query):
+        """
+        sends query to database and returns the results
+        should not be used to update database
+
+        :param query: SQL query
+        :return: 2d array of data from database
         """
 
         self.database.execute("select customer.customer_id, customer.customer_name, orders.order_date, product.product_name from customer left join orders on customer.customer_id = orders.customer_id left join product on orders.product_id = product.product_id;")
 
         myresult = self.database.fetchall()
-        print(myresult)
 
-        self.state = "inactive"
+        return myresult
 
-    def updateTable(self):
-        self.database.execute("insert into orders (order_id, customer_id, order_date, order_state_id, product_id)\
-                 values (1, 1, '2018-01-01', 1, 3);")
-
-        self.state = "inactive"
-
-
-
-    def runQuery(self, query):
-
-        self.database.execute(query)
-
-
-
-    def update(self, time):
+    def runUpdateQuery(self, query):
         """
-        test two
-        :param time:
-        :return:
+        sends query to database to update table
+        :param query:
         """
-        if time % self.frequency == 0:
-            self.state = "active"
 
-
-    def update(self, time):
-        self.updateState(time)
-        if self.state == "inactive":
-            pass
-
-        else:
-            self.updateTable()
-            self.sendQuery()
-        
+        self.generalData.getConnection().cursor().execute(query)
+        self.generalData.getConnection().commit()
