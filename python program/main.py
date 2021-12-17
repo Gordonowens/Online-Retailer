@@ -1,8 +1,7 @@
 import mysql.connector
-import pandas
 from CustomerBot import *
 from GeneralData import *
-import time
+from WorkerBot import *
 import datetime
 
 def testFunctions():
@@ -42,17 +41,26 @@ def main():
 
   #create general data
   myData = GeneralData(datetime.datetime.now(), [['soccer boots', 'football', 'tennis racket'], ['twighlight', 'harry potter', 'how to look after dog'],
-                    ['garden soil', 'bucket', 'shovel']], mydb)
+                    ['garden soil', 'bucket', 'shovel']], [['cows milk', 'apples', 'pears'], ['work boots', 'high vis shirt', 'belts']], mydb)
 
   #create mybot
-  mybot = CustomerBot(4, mycursor, 1, 'steve', 'alderman', .1, .5, 0, myData)
+  mybot = CustomerBot(4, mycursor, 1, 'steve', 'alderman', .1, .1, 0, myData)
+
+  myWorker = WorkerBot(4, mycursor, 1, 'alfred', 'curts', myData, .05, .2, 5)
 
 
   while(myData.getTime().year != 2023):
+
+    #add 20 minutes
+    myData.addHalfHour()
+
+    #update workerbot
+    myWorker.update()
+
     #add a day
     myData.addDay()
     #update my bot
-    mybot.update()
+    #mybot.update()
     #myData.printTime()
 
   mycursor.execute(

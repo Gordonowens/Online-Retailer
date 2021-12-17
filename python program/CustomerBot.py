@@ -65,7 +65,7 @@ class CustomerBot(BasicBot):
 
         print(query)
 
-        self.runUpdateQuery(query)
+        #self.runUpdateQuery(query)
 
         self.id += 1
         #update customer's orders list

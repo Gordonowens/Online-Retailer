@@ -4,11 +4,23 @@ class GeneralData():
     this is used to hold non specific data that is used by all classes
     """
 
-    def __init__(self, time, products, connection):
+    def __init__(self, time, products, orders, connection):
 
         self.time = time
         self.products = products
+        self.orders = orders
         self.connection = connection
+
+    def getOrder(self):
+
+        if len(self.orders) == 0:
+            return []
+
+        else:
+            return self.orders.pop()
+
+
+
 
     def getConnection(self):
         """
@@ -39,6 +51,14 @@ class GeneralData():
         adds month to time
         """
         self.time += datetime.timedelta(month=1)
+
+
+    def addHalfHour(self):
+        """
+        adds half hour
+        """
+
+        self.time += datetime.timedelta(minutes=30)
 
     def getTime(self):
         """
