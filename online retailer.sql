@@ -1,21 +1,23 @@
-create database test;
+create database onlineretailer;
 
-use test;
+use onlineretailer;
 
 CREATE TABLE customer (
- customer_id INT unique not null PRIMARY KEY,
+ customer_id INT unique not null PRIMARY KEY AUTO_INCREMENT,
  customer_name VARCHAR(50) NOT NULL,
- category_id int NOT NULL,
+ category_id int default 1,
  customer_phone varchar(50)
 );
 
 CREATE TABLE customerFinance (
- finance_account INT unique not null PRIMARY KEY,
+ finance_account INT unique not null,
  customer_id int not null,
  bank_id int not null,
  account_value int not null,
  start_date datetime,
- finish_date datetime
+ finish_date datetime,
+ Primary Key (finance_account),
+ Foreign Key (customer_id) references customer(customer_id)
 );
 
 CREATE TABLE bank (
@@ -23,32 +25,122 @@ CREATE TABLE bank (
  bank_name varchar(50)
 );
 
-insert into bank (bank_id, bank_name) 
-values (1, 'CBA'), (2, 'Westpac'), (3, 'St George');
-
-
-CREATE TABLE orders (
- order_id INT unique not null PRIMARY KEY,
- customer_id int not null,
- order_date datetime not null,
- order_state_id int not null,
- product_id int not null
+CREATE TABLE supplier (
+ supplier_id INT unique not null PRIMARY KEY,
+ supplier_name char(50),
+ supplier_phone char(50)
 );
 
 CREATE TABLE product (
- product_id INT unique not null PRIMARY KEY,
+ product_id INT unique not null,
  supplier_id int not null,
  product_name char(50),
  product_quantity int not null,
- product_price int not null
+ product_price int not null,
+ Primary Key (product_id),
+ Foreign Key (supplier_id) references supplier(supplier_id)
 );
 
-select customer.customer_id, customer.customer_name, orders.order_date, product.product_name
-from customer 
-left join orders on customer.customer_id = orders.customer_id 
-left join product on orders.product_id = product.product_id;
+create table states(
+state_id int unique not null,
+statetype VARCHAR(50) NOT NULL,
+primary key (state_id)
+);
+
+Create Table currentstate(
+current_state_id int unique Not Null auto_increment,
+state_id int not null,
+statedate datetime not null,
+Primary Key (current_state_id),
+foreign Key(state_id) references states(state_id)
+);
+
+CREATE TABLE orders (
+ order_id INT not null,
+ customer_id int not null,
+ current_state_id int NOT NULL,
+ Primary Key (order_id),
+ Foreign Key (customer_id) references customer(customer_id),
+ Foreign Key (current_state_id) references currentstate (current_state_id)
+);
+
+CREATE TABLE orderproducts(
+id int not null,
+order_id int not null,
+product_id int not null,
+quantity int not null,
+current_state_id int not null,
+primary key (id),
+Foreign Key (order_id) references orders(order_id),
+ Foreign Key (product_id) references product(product_id),
+ Foreign Key (current_state_id) references currentstate (current_state_id)
+);
+
+CREATE TABLE workerposition (
+ position_id INT unique not null Primary Key,
+ position_type varchar(50),
+ position_salary int not null
+);
 
 
+CREATE TABLE warehouseworker (
+ worker_id INT unique not null AUTO_INCREMENT,
+ position_id int not null,
+ worker_name char(50),
+ worker_start_date date not null,
+ order_id int,
+ pallet_id int,
+ Primary Key (worker_id),
+ Foreign Key(order_id) references orders(order_id),
+ Foreign Key(position_id) references workerposition(position_id)
+);
+
+CREATE TABLE pallet (
+ pallet_id INT not null auto_increment,
+ worker_id int,
+ order_id int not null,
+ pallet_state_id int not null,
+ pallet_product_id int,
+ product_quantity int,
+ Primary Key (pallet_id),
+ foreign key(worker_id) references warehouseworker(worker_id),
+ foreign key(pallet_state_id) references currentstate(current_state_id),
+ foreign key(pallet_product_id) references product(product_id)
+);
+
+CREATE TABLE supplierorder (
+ order_id INT not null,
+ supplier_id int not null,
+ product_id int not null,
+ quantity int not null,
+ current_state_id int not null,
+ Primary Key (order_id),
+ foreign key (supplier_id) references supplier(supplier_id),
+ foreign key (product_id) references product(product_id),
+ foreign key (current_state_id) references currentstate(current_state_id)
+);
+
+
+insert into states(state_id, statetype) 
+values(1, 'order placed'),
+(2, 'order currently being picked'),
+(3, 'order shipped'),
+(4, 'inactive'),
+(5, 'currently picking');
+
+insert into workerposition (position_id, position_type, position_salary) 
+values (1, "basic worker", 50000),
+(2, "manager", 75000);
+
+/* 
+
+#create customer
+insert into customer (customer_name, category_id, customer_phone) values ("steve", 1, "55533");
+
+insert into supplier (supplier_id, supplier_name, supplier_phone) 
+values (1, 'addidas', "01123434" ), 
+(2, 'Book store', "4400055"), 
+(3, 'garden store', "448858843");
 
 insert into product (product_id, supplier_id, product_name, product_quantity, product_price) 
 values (1, 1, "basketball shoes", 50, 300), 
@@ -63,114 +155,77 @@ values (1, 1, "basketball shoes", 50, 300),
 (10, 3, "potting mix", 40, 30),
 (11, 3, "garden gnome", 10, 5);
 
+#create worker
+insert into warehouseworker (position_id, worker_name, worker_start_date) 
+values (1, "gary smith", '2018-11-01'), 
+(1, "albert kevin", '2020-06-20'), 
+(1, "frank marriot", '2018-06-01'), 
+(1, "kevin gandhi", '2018-01-01'), 
+(2, "Mr burns", '2017-11-01');
+
+insert into bank (bank_id, bank_name) 
+values (1, 'CBA'), (2, 'Westpac'), (3, 'St George');
 
 
-CREATE TABLE warehousetask (
- task_id INT unique not null PRIMARY KEY,
- status_id int not null,
- order_id int not null,
- product_id int not null,
- worker_id int not null,
- date_time_started datetime not null,
- date_time_finished datetime
-);
 
+#add order
+insert into orders
+value(1, 1, 1, 1, 3);
 
+#update order state
+insert into currentstate(state_id, statedate)
+values("relevant id", "relevant date");
 
-CREATE TABLE warehouseworker (
- worker_id INT unique not null PRIMARY KEY,
- task_id int,
- position_id int not null,
- worker_name char(50),
- worker_start_date date not null,
- pallet_id int unique
-);
+SELECT current_state_id FROM currentstate ORDER BY current_state_id DESC LIMIT 1;
 
-insert into warehouseworker (worker_id, position_id, worker_name, worker_start_date) 
-values (1, 1, "gary smith", '2018-11-01'), 
-(2, 1, "albert kevin", '2020-06-20'), 
-(3, 1, "frank marriot", '2018-06-01'), 
-(4, 1, "kevin gandhi", '2018-01-01'), 
-(5, 2, "Mr burns", '2017-11-01');
+update orders
+set current_state_id = "X"
+where orders.order_id = "y";
 
-CREATE TABLE workerposition (
- position_id INT unique not null PRIMARY KEY,
- position_type varchar(50),
- position_salary int not null
-);
+#get products table
+select distinct product_name from product;
 
-insert into workerposition (position_id, position_type, position_salary) 
-values (1, "basic worker", 50000),
-(2, "manager", 75000); 
+#update products table
+update product
+set product_quantity = "x"
+where product_id = "y";
 
-CREATE TABLE pallet (
- pallet_id INT unique not null PRIMARY KEY,
- worker_id int,
- pallet_status_id int not null,
- pallet_product_id int,
- product_quantity int
-);
+update product
+set product_price = "x"
+where product_id = "y";
 
-CREATE TABLE taskstatus (
- status_id INT unique not null PRIMARY KEY,
- task_type varchar(50)
-);
+#get sum of products ordered
+select product.product_name, sum(product.product_id) as quantity,  sum(product.product_id)* product.product_price as totalsales
+from product inner join orders on product.product_id = orders.product_id
+where orders.current_state_id = 1
+group by product.product_id;
 
+#update worker pallet
+update warehouseworker
+set pallet_id = "x"
+where worker_id = "y";
 
-insert into taskstatus (status_id, task_type) 
-values (1, 'inactive'), (2, 'started'), (3, 'finished');
+#get customer orders and their status's
+select customer.customer_id, customer.customer_name, product.product_name, orders.quantity, states.statetype
+from customer inner join orders on customer.id = orders.customer_id
+left join products on orders.product_id = product.product_id
+left join currentstate on orders.current_state_id = currentstate.current_state_id
+left join states on currentstate.current_state_id = states.state_id;
 
-CREATE TABLE supplier (
- supplier_id INT unique not null PRIMARY KEY,
- supplier_name char(50),
- supplier_phone char(50)
-);
+#create pallet
+insert into pallet(worker_id, order_id, pallet_state_id, pallet_product_id, product_quantity)
+values(1,1,1,1,3);
 
-insert into supplier (supplier_id, supplier_name, supplier_phone) 
-values (1, 'addidas', "01123434" ), 
-(2, 'Book store', "4400055"), 
-(3, 'garden store', "448858843");
+#update pallet status
+insert into currentstate(state_id, statedate)
+values("relevant id", "relevant date");
 
-CREATE TABLE supplierorder (
- order_id INT unique not null PRIMARY KEY,
- supplier_id int not null,
- product_id int not null,
- order_status_id int not null,
- start_date date not null,
- complete_date date
-);
+SELECT current_state_id FROM currentstate ORDER BY current_state_id DESC LIMIT 1;
 
-select host from information_schema.processlist;
+update pallet
+set pallet_state_id = "x"
+where pallet_id = "y";
 
-select @@hostname;
-show variables where Variable_name like '%host%';
-
-select user();
-
-CREATE USER 'gordon' IDENTIFIED BY "fjk54#djk^";
-GRANT ALL PRIVILEGES ON test.* TO 'gordon';
-
-
-LOAD DATa INFILE "table data//customer.csv"
-INTO TABLE customer
-FIELDS TERMINATED BY ',' 
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS;
-
-select * from customer;
-
-SHOW VARIABLES LIKE 'secure_file_priv'
-
-show tables
-
-SHOW GLOBAL VARIABLES LIKE 'local_infile';
-
-SELECT CURRENT_USER();
-SHOW GRANTS for 'gordon'
-
-SET GLOBAL local_infile = 'ON';
-
-SET GLOBAL local_infile=1;
-
-define('DB_HOST', 'localhost')
+insert into supplierorder(order_id, supplier_id, product_id, quantity, current_state_id)
+values(1, 1, 1, 1,40, 3);
+*/

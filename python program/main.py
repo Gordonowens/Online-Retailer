@@ -39,6 +39,7 @@ def main():
 
 
 
+
   #create general data
   myData = GeneralData(datetime.datetime.now(), [['soccer boots', 'football', 'tennis racket'], ['twighlight', 'harry potter', 'how to look after dog'],
                     ['garden soil', 'bucket', 'shovel']], [['cows milk', 'apples', 'pears'], ['work boots', 'high vis shirt', 'belts']], mydb)
@@ -67,7 +68,7 @@ def main():
     "select * from orders;")
 
   myresult = mycursor.fetchall()
-  print(myresult)
+  print(type(myresult))
 
   mycursor.close()
 
