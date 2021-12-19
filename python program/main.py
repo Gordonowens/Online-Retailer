@@ -1,6 +1,6 @@
 import mysql.connector
 from CustomerBot import *
-from GeneralData import *
+from Simulation import *
 from WorkerBot import *
 import datetime
 

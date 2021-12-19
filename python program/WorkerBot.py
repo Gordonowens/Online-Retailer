@@ -61,6 +61,8 @@ class WorkerBot(BasicBot):
 
             print("worker picks " + self.orders.pop())
 
+        DataBase.pickProduct(x,y,z)
+
         # check if product available
         #if available update product table
 

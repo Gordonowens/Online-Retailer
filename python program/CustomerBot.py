@@ -57,11 +57,15 @@ class CustomerBot(BasicBot):
         #select product
         selectedProduct = self.generalData.getProducts()[productType][1]
 
+        self.orders.append(DataBase.makeOrder(x,y,z))
+
+
+
         #create query
         print("i buy " + selectedProduct)
 
 
-        query = "insert into orders (order_id, customer_id, order_date, order_state_id, product_id) values (" + str(self.id) + ", 1," + "'" + str(self.generalData.getTime()) + "'" + ", 1, 3);"
+        #query = "insert into orders (order_id, customer_id, order_date, order_state_id, product_id) values (" + str(self.id) + ", 1," + "'" + str(self.generalData.getTime()) + "'" + ", 1, 3);"
 
         print(query)
 
