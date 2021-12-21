@@ -31,8 +31,13 @@ CREATE TABLE supplier (
  supplier_phone char(50)
 );
 
+insert into supplier (supplier_id, supplier_name, supplier_phone) 
+values (1, 'addidas', "01123434" ), 
+(2, 'Book store', "4400055"), 
+(3, 'garden store', "448858843");
+
 CREATE TABLE product (
- product_id INT unique not null,
+ product_id INT unique not null AUTO_INCREMENT,
  supplier_id int not null,
  product_name char(50),
  product_quantity int not null,
@@ -93,19 +98,6 @@ CREATE TABLE warehouseworker (
  Primary Key (worker_id),
  Foreign Key(order_id) references orders(order_id),
  Foreign Key(position_id) references workerposition(position_id)
-);
-
-CREATE TABLE pallet (
- pallet_id INT not null auto_increment,
- worker_id int,
- order_id int not null,
- pallet_state_id int not null,
- pallet_product_id int,
- product_quantity int,
- Primary Key (pallet_id),
- foreign key(worker_id) references warehouseworker(worker_id),
- foreign key(pallet_state_id) references currentstate(current_state_id),
- foreign key(pallet_product_id) references product(product_id)
 );
 
 CREATE TABLE supplierorder (

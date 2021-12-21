@@ -3,15 +3,20 @@ import random
 
 class WorkerBot(BasicBot):
 
-    def __init__(self, frequency, database, id, fName, lName, generalData, lazyFreq, mistake, speed, lazy = False):
+    def __init__(self, fName, lName,  lazyFreq, mistake, speed, position, database):
 
 
-        BasicBot.__init__(self, frequency, database, id, fName, lName, generalData)
+        BasicBot.__init__(self, fName, lName)
         self.lazyFrequency = lazyFreq
         self.mistakeRate = mistake
         self.speed = speed
+        self.position = position
+        self.database = database
         self.orders = []
 
+
+    def born(self):
+        self.database.createWorker(self)
 
     def update(self):
 
@@ -78,4 +83,12 @@ class WorkerBot(BasicBot):
         #update worker bot status to inactive
 
         return 0
+
+    def print(self):
+
+        print(self.fName, self.lName, self.lazyFrequency, self.mistakeRate, self.speed)
+
+
+    def getPosition(self):
+        return self.position
 

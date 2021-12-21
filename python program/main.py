@@ -2,7 +2,12 @@ import mysql.connector
 from CustomerBot import *
 from Simulation import *
 from WorkerBot import *
+from DataBase import *
 import datetime
+
+import pandas as pd
+
+
 
 def testFunctions():
   """
@@ -13,6 +18,26 @@ def testFunctions():
 
   return 0
 
+
+def setUpDataBase(database, customers, workers, productdf):
+
+  #drop database
+  database.dropDataBase()
+
+  #set up database
+  database.runScript("C:\\Users\\User\\Documents\\online retailer\\online retailer.sql")
+
+  #set up customers
+  for i in customers:
+    i.born()
+
+  #set up workers
+  for i in workers:
+    i.born()
+
+  #set up products
+  for index, row in productdf.iterrows():
+    database.createProduct(row['supplierID'], row['description'], row['quantity'], row['price'])
 
 def main():
 
@@ -27,29 +52,42 @@ def main():
     user="gordon",
     password="fjk54#djk^",
 
-    db = "test"
+    db = "onlineretailer"
   )
 
-  #print(testFunctions.__doc__)
+  mydatabase = DataBase(mydb)
 
-  #print("Using help:")
-  #help(testFunctions)
+  customers = []
+  workers = []
 
-  mycursor = mydb.cursor()
+  #create customers
+  customer_header_list = ['fname', 'lname', 'phone', 'fraud', 'buy', 'default']
+  customerdf = pd.read_csv('simulationdata\customers.csv', names=customer_header_list)
 
+  for index, row in customerdf.iterrows():
+    # print(row['fname'])
 
+    customers.append(
+      CustomerBot(row['fname'], row['lname'], row['phone'], row['fraud'],
+                row['buy'], row['default'], mydatabase))
 
+  # create worker
+  worker_header_list = ['position', 'fname', 'lname', 'lazyfreq', 'mistakefreq', 'speed']
+  workerdf = pd.read_csv('simulationdata\workers.csv', names=worker_header_list)
 
-  #create general data
-  myData = GeneralData(datetime.datetime.now(), [['soccer boots', 'football', 'tennis racket'], ['twighlight', 'harry potter', 'how to look after dog'],
-                    ['garden soil', 'bucket', 'shovel']], [['cows milk', 'apples', 'pears'], ['work boots', 'high vis shirt', 'belts']], mydb)
+  for index, row in workerdf.iterrows():
+    # print(row['fname'])
 
-  #create mybot
-  mybot = CustomerBot(4, mycursor, 1, 'steve', 'alderman', .1, .1, 0, myData)
+    workers.append(
+      WorkerBot(row['fname'], row['lname'], row['lazyfreq'], row['mistakefreq'],
+                row['speed'], row['position'], mydatabase))
 
-  myWorker = WorkerBot(4, mycursor, 1, 'alfred', 'curts', myData, .05, .2, 5)
+  product_header_list = ['supplierID', 'description', 'quantity', 'price']
+  productdf = pd.read_csv('simulationdata\products.csv', names=product_header_list)
 
+  setUpDataBase(mydatabase, customers, workers, productdf)
 
+'''
   while(myData.getTime().year != 2023):
 
     #add 20 minutes
@@ -69,8 +107,10 @@ def main():
 
   myresult = mycursor.fetchall()
   print(type(myresult))
+'''
 
-  mycursor.close()
+
+
 
 
 if __name__=="__main__":

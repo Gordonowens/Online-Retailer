@@ -7,15 +7,20 @@ class CustomerBot(BasicBot):
 
     """
 
-    def __init__(self, frequency, database, id, fName, lName, fraudRate,  buyFrequency, defaultRate, generalData, finance = False):
-        BasicBot.__init__(self, frequency, database, id, fName, lName, generalData)
+    def __init__(self, fName, lName, phoneNumber, fraudRate,  buyFrequency, defaultRate, database, finance = False):
+        BasicBot.__init__(self, fName, lName)
         self.order = []
         self.finance = finance
         self.buyFrequency = buyFrequency
         self.fraudRate = fraudRate
         self.defaultRate = defaultRate
-        self.id = 500
+        self.phoneNumber = str(phoneNumber)
+        self.database = database
 
+
+    def born(self):
+        self.database.createCustomer(self)
+        #set id equal
 
     def update(self):
         """
@@ -39,6 +44,9 @@ class CustomerBot(BasicBot):
             self.makeFinancePayment()
 
 
+    def getPhoneNumber(self):
+        return self.phoneNumber
+
     def checkPaymentOwing(self):
         """
         checks if a payment is due or not
@@ -55,7 +63,9 @@ class CustomerBot(BasicBot):
         productType = 0
 
         #select product
-        selectedProduct = self.generalData.getProducts()[productType][1]
+        #selectedProduct = self.generalData.getProducts()[productType][1]
+
+        selectProduct = "basket ball shoes"
 
         self.orders.append(DataBase.makeOrder(x,y,z))
 
@@ -92,6 +102,5 @@ class CustomerBot(BasicBot):
         """
         #make payment
         pass
-
 
 
