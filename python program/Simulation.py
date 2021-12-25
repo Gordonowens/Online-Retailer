@@ -4,12 +4,9 @@ class Simulation():
     this is used to hold non specific data that is used by all classes
     """
 
-    def __init__(self, time, customerFile, orders):
+    def __init__(self, time):
 
         self.time = time
-        self.customers = self.getCustomerData(customerFile)
-        self.workers  = self.getWorkerData(workerFilePath)
-        self.products = products
 
     def getCustomerData(self, filepath):
         #read csv
@@ -24,14 +21,6 @@ class Simulation():
         return 1
 
 
-
-    def getOrder(self):
-
-        if len(self.orders) == 0:
-            return []
-
-        else:
-            return self.orders.pop()
 
     def addDay(self):
         """adds day to time"""

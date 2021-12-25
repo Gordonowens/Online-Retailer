@@ -18,26 +18,58 @@ def testFunctions():
 
   return 0
 
+def createCustomers(connection, folderPath):
 
-def setUpDataBase(database, customers, workers, productdf):
+  customers = []
+  # create customers
+  customer_header_list = ['fname', 'lname', 'phone', 'fraud', 'buy', 'default']
+  customerdf = pd.read_csv(folderPath + 'simulationdata/customers.csv', names=customer_header_list)
 
-  #drop database
-  database.dropDataBase()
+  for index, row in customerdf.iterrows():
+    # print(row['fname'])
 
-  #set up database
-  database.runScript("C:\\Users\\User\\Documents\\online retailer\\online retailer.sql")
+    customers.append(
+      CustomerBot(row['fname'], row['lname'], row['phone'], row['fraud'],
+                  row['buy'], row['default'], connection))
 
-  #set up customers
-  for i in customers:
-    i.born()
 
-  #set up workers
-  for i in workers:
-    i.born()
+  return customers
 
-  #set up products
+
+def createWrokers(connection, folderPath):
+
+  workers = []
+
+  # create worker
+  worker_header_list = ['position', 'fname', 'lname', 'lazyfreq', 'mistakefreq', 'speed']
+  workerdf = pd.read_csv(folderPath + 'simulationdata\workers.csv', names=worker_header_list)
+
+  for index, row in workerdf.iterrows():
+    # print(row['fname'])
+
+    workers.append(
+      WorkerBot(row['fname'], row['lname'], row['lazyfreq'], row['mistakefreq'],
+                row['speed'], row['position'], connection))
+
+  return workers
+
+
+def createProducts(connection, folderPath):
+  product_header_list = ['supplierID', 'description', 'quantity', 'price']
+  productdf = pd.read_csv(folderPath + 'simulationdata\products.csv', names=product_header_list)
+
   for index, row in productdf.iterrows():
-    database.createProduct(row['supplierID'], row['description'], row['quantity'], row['price'])
+
+    connection.createProduct(row)
+
+
+def createSuppliers(connection, folderPath):
+  supplier_header_list = ['supplierID', 'suppliername', 'supplierphone']
+  supplierdf = pd.read_csv(folderPath + 'simulationdata\suppliers.csv', names=supplier_header_list)
+
+  for index, row in supplierdf.iterrows():
+
+    connection.createSupplier(row)
 
 def main():
 
@@ -45,47 +77,55 @@ def main():
   this is a function
   :return:
   """
-
+  simulationData = Simulation(datetime.datetime.now())
+  folderPath = "C:/Users/User/Documents/online retailer/"
+  sqlscriptOne = "C:/Users/User/Documents/online retailer/SQL program/script one.sql"
+  sqlScriptTwo = "C:/Users/User/Documents/online retailer/SQL program/script two.sql"
 
   mydb = mysql.connector.connect(
     host="DESKTOP-S5B5DOL",
     user="gordon",
     password="fjk54#djk^",
 
-    db = "onlineretailer"
+    #db = "onlineretailer"
   )
 
-  mydatabase = DataBase(mydb)
+  mydatabase = DataBase(mydb, simulationData)
+  try:
+    mydatabase.dropDataBase()
 
-  customers = []
-  workers = []
+  except:
+    pass
+
+  #run first script
+  mydatabase.runSQLScript(sqlscriptOne)
 
   #create customers
-  customer_header_list = ['fname', 'lname', 'phone', 'fraud', 'buy', 'default']
-  customerdf = pd.read_csv('simulationdata\customers.csv', names=customer_header_list)
+  customers = createCustomers(mydatabase, folderPath)
 
-  for index, row in customerdf.iterrows():
-    # print(row['fname'])
+  workers = createWrokers(mydatabase, folderPath)
 
-    customers.append(
-      CustomerBot(row['fname'], row['lname'], row['phone'], row['fraud'],
-                row['buy'], row['default'], mydatabase))
+  createSuppliers(mydatabase, folderPath)
 
-  # create worker
-  worker_header_list = ['position', 'fname', 'lname', 'lazyfreq', 'mistakefreq', 'speed']
-  workerdf = pd.read_csv('simulationdata\workers.csv', names=worker_header_list)
+  mydatabase.runSQLScript(sqlScriptTwo)
 
-  for index, row in workerdf.iterrows():
-    # print(row['fname'])
+  createProducts(mydatabase, folderPath)
 
-    workers.append(
-      WorkerBot(row['fname'], row['lname'], row['lazyfreq'], row['mistakefreq'],
-                row['speed'], row['position'], mydatabase))
+  i = 0
+  while i < 2:
+    customers[i].born()
+    i = i + 1
 
-  product_header_list = ['supplierID', 'description', 'quantity', 'price']
-  productdf = pd.read_csv('simulationdata\products.csv', names=product_header_list)
+  i = 0
+  while i < 2:
+    workers[i].born()
+    i = i + 1
 
-  setUpDataBase(mydatabase, customers, workers, productdf)
+
+  #mydatabase.makeOrder(1, 1)
+
+
+
 
 '''
   while(myData.getTime().year != 2023):
